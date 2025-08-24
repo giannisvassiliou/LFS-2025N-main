@@ -1,0 +1,10 @@
+DBPEdia_orig_quer : The original DBpedia queries (triples extracted)
+YAGO_orig_quer : The original YAGO queries (triples extracted)
+Wikidata.rar : Same info for wikidata
+
+
+DBpedia_1_sum: Result of the parserIT for limit 1
+DBPedia_1_quer: The corresponding queries
+
+Same for other two datasets.
+
