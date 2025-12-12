@@ -1,84 +1,159 @@
-# Love-at-First-Sight: First Answers Without the Awkward Silencein Big Knowledge Graphs
-The increasing number of large knowledge graphs (KGs) now available online requires methods for their efficient exploration. Most of these KGs offer online SPARQL endpoints for querying and exploring their data. In a typical scenario, the users issue coarse, exploratory queries at the beginning, refining them further in the sequel in order to find the answer to the question in mind. However, those coarse exploratory queries are costly to evaluate as they usually involve many results and take too much time to be answered, or even worse, they time out, limiting the exploration potential of the data they expose. 
-In this paper, we present the LFS (Love-at-First-Sight) system, offering a unique solution to the aforementioned problem, enabling users to efficiently get the first answers to their queries. More specifically, we are the first to define the problem of constructing first-sight summaries (FSS), i.e., summaries able to provide rapidly, first answers to user queries, relying on existing query logs. We provide effective algorithms for constructing both exact and approximate FSS under budget constraints with theoretical guarantees. We analytically and experimentally show the big benefits of the proposed summaries, reducing latency up to two orders of magnitude over traditional SPARQL endpoints and up to one order of magnitude compared to relevant baselines.
- <p align="center">
- 
-</p>
-<p align="center">
-  <img src="https://github.com/giannisvassiliou/LFS-ICDE-2024/blob/main/lfs2.JPG?raw=true" alt="Sublime's custom image"/>
-</p>
+# Love-at-First-Sight (LFS)
+**First Answers Without the Awkward Silence in Big Knowledge Graphs**
 
-## LFS Data Creator
+## Overview
 
-Firstly we need to create the data by accessing the endpoint of the desired dataset. The parserIT.py script has the following syntax
-<br>
-<br><b> USAGE:  parserIT queryfile {flag 1/0 m(ost) f(requent) or non mf}  {basefilename} {limit} {urlendpoint} </b>
-<br>
-<br>
-<b>
-Where
-</b>
-<li>
-queryfile : The name of the original query log (see data folder, choose e.g YAGO_orig_quer.txt) 
-</li>
-<li>
-flag : 0 or 1  whether we need most frequent results 1 (yes) or  0 (no)
-</li>
-<li>
-basefilename: a string to base the output file names {e.g yago}
-</li>
+The increasing availability of large Knowledge Graphs (KGs) such as **DBpedia**, **YAGO**, and **Wikidata** has made SPARQL endpoints the standard interface for data exploration. However, exploratory SPARQL queries are often expensive, returning very large result sets or timing out, which limits interactive analysis.
 
+**Love-at-First-Sight (LFS)** addresses this problem by enabling users to obtain **fast, first answers** to exploratory queries.  
+The system introduces **First-Sight Summaries (FSS)**: compact RDF summaries built from historical query logs that can answer many user queries with very low latency, before optionally falling back to the original SPARQL endpoint.
 
+LFS offers:
+- Fast first answers to exploratory SPARQL queries
+- RDF summaries constructed under budget constraints
+- Significant latency reductions compared to direct endpoint querying
+- Seamless integration with live SPARQL endpoints
 
-<li>
-limit: a SPARQL limit {e.g. 500}
-</li>
-<li>
-urlendpoint: a valid url endpoint ( e.g.  https://yago-knowledge.org/sparql/query )
-</li>
-<br>
-<b> We have stored in data folder results-examples for the 3 datasets we used (DBpedia, YAGO, Wikidata) </b>
-<br> These files can be used directly from the LFS Evaluator
+---
 
-<br> <br>
-## LFS Evaluator
+## System Components
 
-You need to provide two INPUT files (<b> orig_summary_filename</b> and <b> queries_for_summary</b> ) and one filename for OUTPUT (the actual <b> .nt LFS Summary </b>) ,  finally  the <b> address_of_endpoint </b>{OPTIONAL}
-<br><b> <br>
-USAGE:  lfs orig_summary_filename queries_for_summary LFS_summary_output {url of endpoint - optional} </b>
-<br>
-<br>
-<b>
-Where
-</b>
-<li>
- orig_summary_filename: The filename of the summary that parserIT produced
- </li>
- <li>
- queries_for_summary: The filename of the previous summary, corresponding queries
- 
-</li>
-<li>
- LFS_summary_output: The final .nt file of the actual LFS summary
-</li>
+The current version of LFS consists of two main scripts:
 
-<li> address_of_endpoint: if given, the system will try to evaluate the queries cannot be answered by the LFS Summary, from the endpoint
-</li>
+1. **Parser / Data Creator** – materializes triples from query logs by querying a SPARQL endpoint  
+2. **LFS Evaluator & Summary Builder** – builds an RDF summary and evaluates query coverage and performance
 
-<br>
+---
 
-<b>The previous script, will:</b>
-<br>
-<li> Create the train/test portions from the orig_summary_filename </li>
-<li> Create the lfs .nt summary (from the train portion)</li>
-<li> Query the .nt summary created with the test queries</li>
-<li> Present the % of the first-sight queries replied, and the time consumed</li>
+## 1. LFS Data Creator (Parser)
 
- ## Used Python v3.9 - Required Python libraries
-<br>
-<li>rdflib</li>
-<li>pandas</li>
-<li>SPARQLWrapper</li>
-<li>numpy</li>
-<li>sys</li>
-<li>JSON</li>
+The parser reads a query log containing **comma-separated triple patterns**, sends them to a SPARQL endpoint, and instantiates triples from the returned bindings.
+
+### Script
+```
+parser_vldb_v1.py
+```
+
+### Usage
+```
+python parser_vldb_v1.py queryfile mfflag basefilename limit urlendpoint
+```
+
+### Parameters
+
+- **queryfile**  
+  Input file containing one query per line.  
+  Each line consists of comma-separated triple patterns.
+
+- **mfflag**  
+  Determines how bindings are selected:
+  - `1` → use most frequent bindings
+  - `0` → use bindings in endpoint order
+
+- **basefilename**  
+  Base name for all output files.
+
+- **limit**  
+  SPARQL `LIMIT` applied to each query.
+
+- **urlendpoint**  
+  SPARQL endpoint URL  
+  (e.g. `https://yago-knowledge.org/sparql/query`)
+
+### Output Files
+
+For each run, the parser generates:
+
+- `1{base}_{mfflag}_{limit}.txt` – top-1 instantiations  
+- `5{base}_{mfflag}_{limit}.txt` – top-5 instantiations  
+- `10{base}_{mfflag}_{limit}.txt` – top-10 instantiations  
+- `Queries_{base}_{mfflag}_{limit}.txt` – query patterns that produced results
+
+These files are used as input to the LFS evaluator.
+
+---
+
+## 2. LFS Evaluator & Summary Builder
+
+This component constructs an **LFS RDF summary** from instantiated triples and evaluates how well it answers unseen queries.
+
+### Script
+```
+LFS_vldb_v1.py
+```
+
+### Usage
+```
+python LFS_vldb_v1.py summary_file queries_file summary_output percent [--endpoint URL] [--novel-only]
+```
+
+### Parameters
+
+- **summary_file**  
+  File containing instantiated triples (parser output).
+
+- **queries_file**  
+  File containing query patterns to be evaluated.
+
+- **summary_output**  
+  Output `.nt` file containing the LFS summary.
+
+- **percent**  
+  Fraction of distinct triples to include in the summary  
+  (e.g. `1.0` = 100%, `0.1` = 10%)
+
+- **--endpoint (optional)**  
+  SPARQL endpoint URL used when queries cannot be answered locally.
+
+- **--novel-only (optional)**  
+  Evaluate only test queries not seen during training.
+
+### Evaluation Process
+
+The evaluator:
+1. Splits data into training and test sets (K-Fold)
+2. Extracts and cleans triples from training data
+3. Selects the most frequent triples
+4. Builds an RDF summary in N-Triples format
+5. Executes test queries against the summary
+6. Optionally queries the remote endpoint
+7. Reports coverage and timing statistics
+
+---
+
+## Example Workflow
+
+```bash
+# Step 1: Generate instantiated triples
+python parser_vldb_v1.py YAGO_orig_queries.txt 1 yago 500 https://yago-knowledge.org/sparql/query
+
+# Step 2: Build and evaluate an LFS summary
+python LFS_vldb_v1.py 10yago_1_500.txt Queries_yago_1_500.txt yago_summary.nt 0.1     --endpoint https://yago-knowledge.org/sparql/query
+```
+
+---
+
+## Datasets
+
+Example outputs for **DBpedia**, **YAGO**, and **Wikidata** are provided in the `data/` directory and can be used directly with the LFS evaluator.
+
+---
+
+## Requirements
+
+- Python 3.9 or newer
+
+### Python Libraries
+```
+rdflib
+pandas
+numpy
+SPARQLWrapper
+scikit-learn
+```
+
+---
+
+## Citation
+
+If you use this software in your research, please cite the **Love-at-First-Sight (LFS)** paper.
