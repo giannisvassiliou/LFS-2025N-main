@@ -1,10 +1,23 @@
+TO FEED PARSER
+***************************
 DBPEdia_orig_quer : The original DBpedia queries (triples extracted)
 YAGO_orig_quer : The original YAGO queries (triples extracted)
+Drugbank_orig_queries_to_feed_parser : The original Drugbank queries (triples extracted)
+
 Wikidata.rar : Same info for wikidata
 
 
+RESULT OF PARSER TO FEED LFS
+************************************************************
 DBpedia_1_sum: Result of the parserIT for limit 1
 DBPedia_1_quer: The corresponding queries
+YAGO_1_sum: Resulkt of the parser for limit 1
+YAGO_1_quer: The corresponding queries
+1,5druger2_0_100: Result ot the parsert for limit 1 + 5
+Queries_druger2_0_100.txt The corresponding queries.
 
-Same for other two datasets.
+Wikidata.rar : Same info for wikidata
+
+
+
 
