@@ -1,0 +1,28 @@
+lfs_B.py
+
+This script constructs LFS SUMMARY from a large RDF-style triple dataset. 
+It first performs a 5-fold split and uses the training portion to extract and clean RDF triples, validate their syntax, and compute triple frequencies.
+ Triples are ranked by frequency and expanded using a co-occurrence heuristic, where triples appearing together in the same summary row (grouped according to the number of triple patterns in the corresponding query) are linked.
+ For multiple summary sizes (20%–100%), 
+the script builds a reduced RDF graph and evaluates its effectiveness by executing test queries locally using SPARQL (LIMIT 1), 
+optionally falling back to a remote endpoint when no local answers are found.
+
+lfs_B_80.py
+
+This script uses the same LFS construction process as lfs_B.py, including frequency-based triple selection and co-occurrence expansion from the training split.
+ The key difference is in evaluation: instead of using held-out test queries, the script evaluates coverage using the training queries themselves. 
+This allows measurement of in-sample query coverage, providing an upper-bound or “best-case” estimate of how well the summary preserves the information seen during training.
+
+lfs_Bl.py
+
+This variant extends the LFS pipeline by introducing an additional DBpedia-based expansion (“plus5”). After selecting frequent triples from the training split, 
+the script uses an auxiliary file (e.g. 5dbpedia_0_1000.txt) and an index mapping from triples to training rows to add related external triples that co-occur with selected ones. 
+The summary size is determined using a fixed, hard-coded distinct-triple baseline rather than the observed dataset size. The resulting expanded summary is evaluated using test queries, 
+measuring how many queries return answers locally (LIMIT 5) and optionally via a remote SPARQL endpoint.
+
+lfs_Bl_80.py
+
+This script combines the DBpedia-based plus5 expansion of lfs_Bl.py with the training-set evaluation strategy of lfs_B_80.py.
+ It builds the LFS from training data, augments it with related DBpedia triples, and evaluates query coverage using training queries instead of test queries.
+ This configuration is useful for analyzing the impact of external knowledge expansion on in-sample query coverage and understanding how much additional recall can be 
+achieved when the evaluation workload closely matches the data used to construct the summary.
