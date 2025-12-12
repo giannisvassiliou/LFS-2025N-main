@@ -1,22 +1,6 @@
-# Love-at-First-Sight:First-Sight Summaries for Rapid Query Answering  in Big Knowledge Graphs
-The increasing number of large knowledge graphs now available
-online requires methods for their effective and efficient exploration.
-Most of these knowledge graphs offer online SPARQL endpoints for
-querying and exploring their data. In a typical scenario, the users
-issue coarse exploratory queries at the beginning, refining them
-further in the sequel in order to find the answer to the question
-in mind. However, those coarse exploratory queries are costly to
-evaluate as they usually involve many results and take too much
-time to be answered, or even worse they time out, limiting the
-exploration potential of the data they expose.
-In this paper, we present the LFS (Love-at-First-Sight) system,
-offering a unique solution to the aforementioned problem, enabling
-users to get the first answers to their queries rapidly. More specifically we are the first to define the problem of constructing a firstsight summary, i.e., a summary able to provide rapidly the first
-answers to user queries. We provide effective algorithms for their
-construction, relying on existing query logs, and we both analytically and experimentally show the big benefits of the proposed
-summaries. They have a compact size, and they can efficiently
-provide first answers (even to unseen) user queries, improving by
-orders of magnitude query response times
+# Love-at-First-Sight: First Answers Without the Awkward Silencein Big Knowledge Graphs
+The increasing number of large knowledge graphs (KGs) now available online requires methods for their efficient exploration. Most of these KGs offer online SPARQL endpoints for querying and exploring their data. In a typical scenario, the users issue coarse, exploratory queries at the beginning, refining them further in the sequel in order to find the answer to the question in mind. However, those coarse exploratory queries are costly to evaluate as they usually involve many results and take too much time to be answered, or even worse, they time out, limiting the exploration potential of the data they expose. 
+In this paper, we present the LFS (Love-at-First-Sight) system, offering a unique solution to the aforementioned problem, enabling users to efficiently get the first answers to their queries. More specifically, we are the first to define the problem of constructing first-sight summaries (FSS), i.e., summaries able to provide rapidly, first answers to user queries, relying on existing query logs. We provide effective algorithms for constructing both exact and approximate FSS under budget constraints with theoretical guarantees. We analytically and experimentally show the big benefits of the proposed summaries, reducing latency up to two orders of magnitude over traditional SPARQL endpoints and up to one order of magnitude compared to relevant baselines.
  <p align="center">
  
 </p>
