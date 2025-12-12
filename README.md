@@ -15,7 +15,10 @@ LFS offers:
 - Seamless integration with live SPARQL endpoints
 
 ---
-
+</p>
+<p align="center">
+  <img src="https://github.com/giannisvassiliou/LFS-ICDE-2024/blob/main/lfs2.JPG?raw=true" alt="Sublime's custom image"/>
+</p>
 ## System Components
 
 The current version of LFS consists of two main scripts:
